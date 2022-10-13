@@ -3,53 +3,58 @@
 module FSM_Light_2(
     input i_clk,
     input i_reset,
-    input [1:0] i_OnOffSW,
-    output [1:0] o_Light
+    input [1:0] i_button,
+    output [1:0] o_light
     );
 
     parameter   S_LED_00 = 2'b00,
                 S_LED_01 = 2'b01,
-                S_LED_10 = 2'b10;
+                S_LED_10 = 2'b10,
+                S_LED_11 = 2'b11;
 
     reg [1:0] curState, nextState;
-    reg [1:0] r_Light;
-    assign o_Light = r_Light;
+    reg [1:0] r_light;
+    assign o_light = r_light;
 
-    /* ìƒíƒœ ë³€ê²½ */
+    /* »óÅÂ º¯°æ */
     always @(posedge i_clk or posedge i_reset) begin
-        if(i_reset) curState <= 2'b00;
+        if(i_reset) curState <= S_LED_00;
         else    curState <= nextState;
     end
 
-    /* ì´ë²¤íŠ¸ ì²˜ë¦¬ */
-    always @(curState or i_OnOffSW) begin
-        nextState <= 2'b00;
+    /* ÀÌº¥Æ® Ã³¸® */
+    always @(curState or i_button) begin
         case (curState)
             S_LED_00 : begin
-                if(i_OnOffSW == 2'b01)  nextState <= 2'b01;
-                else if(i_OnOffSW == 2'b10)  nextState <= 2'b10;
-                else    nextState <= 2'b00;
+                if(i_button[0])         nextState <= S_LED_01;
+                else if(i_button[1])    nextState <= S_LED_11;
+                else                    nextState <= S_LED_00;
             end
             S_LED_01 : begin
-                if(i_OnOffSW == 2'b00)  nextState <= 2'b00;
-                else if(i_OnOffSW == 2'b10)  nextState <= 2'b10;
-                else    nextState <= 2'b00;
+                if(i_button[0])         nextState <= S_LED_10;
+                else if(i_button[1])    nextState <= S_LED_00;
+                else                    nextState <= S_LED_01;
             end
             S_LED_10 : begin
-                if(i_OnOffSW == 2'b00)  nextState <= 2'b00;
-                else if(i_OnOffSW == 2'b01)  nextState <= 2'b01;
-                else    nextState <= 2'b00;
+                if(i_button[0])         nextState <= S_LED_11;
+                else if(i_button[1])    nextState <= S_LED_01;
+                else                    nextState <= S_LED_10;
+            end
+            S_LED_11 : begin
+                if(i_button[0])         nextState <= S_LED_00;
+                else if(i_button[1])    nextState <= S_LED_10;
+                else                    nextState <= S_LED_11;
             end
         endcase 
     end
 
-    /* ìƒíƒœì— ë”°ë¥¸ ë™ì‘ */
+    /* »óÅÂ¿¡ µû¸¥ µ¿ÀÛ */
     always @(curState) begin
-        r_Light = 2'b00;
         case (curState)
-            S_LED_00 :  r_Light = 2'b00;
-            S_LED_01 :  r_Light = 2'b01;
-            S_LED_10 :  r_Light = 2'b10;
+            S_LED_00 :  r_light = 2'b00;
+            S_LED_01 :  r_light = 2'b01;
+            S_LED_10 :  r_light = 2'b10;
+            S_LED_11 :  r_light = 2'b11;
         endcase
     end
 
